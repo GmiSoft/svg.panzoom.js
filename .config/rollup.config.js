@@ -1,10 +1,11 @@
-import babel from 'rollup-plugin-babel'
-import * as pkg from '../package.json'
+import fs from 'fs';
+import babel from '@rollup/plugin-babel'
+import resolve from '@rollup/plugin-node-resolve'
+import commonjs from '@rollup/plugin-commonjs'
 import filesize from 'rollup-plugin-filesize'
-// import { terser } from 'rollup-plugin-terser'
-import resolve from 'rollup-plugin-node-resolve'
-import commonjs from 'rollup-plugin-commonjs'
-import { uglify } from 'rollup-plugin-uglify'
+import terser from '@rollup/plugin-terser'
+
+const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 
 const buildDate = Date()
 
@@ -24,7 +25,7 @@ const headerShort = `/*! ${pkg.name} v${pkg.version} ${pkg.license}*/;`
 const getBabelConfig = (targets, corejs = false) =>
   babel({
     include: 'src/**',
-    runtimeHelpers: true,
+    babelHelpers: 'runtime',
     babelrc: false,
     presets: [
       [
@@ -91,7 +92,7 @@ const config = (node, min, esm = false) => ({
     filesize(),
     !min
       ? {}
-      : uglify({
+      : terser({
           mangle: {
             reserved: classes
           },
